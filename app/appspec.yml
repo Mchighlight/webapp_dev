@@ -1,0 +1,32 @@
+version: 0.0
+os: linux
+
+files:
+  - source: /
+    destination: /home/ubuntu/app
+
+hooks:
+  ApplicationStop:
+  - location: ./scripts/stopApplication.sh
+    timeout: 180
+    runas: ubuntu
+  DownloadBundle:
+  - location: ./scripts/downloadBundle.sh
+    timeout: 180
+    runas: ubuntu
+  Install:
+  - location: ./scripts/install.sh
+    timeout: 180
+    runas: ubuntu      
+  AfterInstall:
+  - location: ./scripts/afterInstall.sh
+    timeout: 180
+    runas: ubuntu    
+  ApplicationStart:
+  - location: ./scripts/startApplication.sh
+    timeout: 180
+    runas: ubuntu
+  ValidateService:
+  - location: ./scripts/validateService.sh
+    timeout: 180
+    runas: ubuntu

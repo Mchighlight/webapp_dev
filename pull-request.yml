@@ -1,0 +1,45 @@
+name: Run tests for pull requests
+  
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  testing:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [10.x]
+
+    services:
+      postgres:
+        image: postgres:10.8
+        env:
+          POSTGRES_USER: webapp
+          POSTGRES_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          POSTGRES_DB: webapp
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+    - name: checkout repository
+      uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: Install Node Package
+      run:  cd app && npm install
+    - name: Install Node dependency Package
+      run: cd app && npm install nodemon chai chai-http mocha npm-pack-zip --save-dev 
+    - name: Create database connection
+      run: |
+        touch app/config/dev.js
+        echo "module.exports = { DATABASE_URL:  'postgres://webapp:${{ secrets.DATABASE_PASSWORD }}@localhost:5432/webapp'}" >> app/config/dev.js
+    - name: create table
+      run:  cd app && npm run table --action=create
+    - name: Run tests
+      run: cd app && npm run test 
