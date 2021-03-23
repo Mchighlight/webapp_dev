@@ -4,6 +4,9 @@ const usersRoute = require('./routes/userRoutes');
 const booksRoute = require('./routes/bookRoutes');
 const filesRoute = require('./routes/fileRoutes');
 const server = express();
+const SDC = require('statsd-client');
+global.sdc = new SDC({host: 'localhost'});
+
 
 global.__basedir = __dirname;
 

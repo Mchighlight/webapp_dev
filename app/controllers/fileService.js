@@ -134,6 +134,8 @@ const createFiles = async (files, book_id, user_id)=> {
         await remove_local_photo();
         return response;
       }
+
+      let s3_timer = new Date() ;
       for( let i=0 ; i < files.length ; i++ ){
         const file_created = new Date().toISOString();
         const s3_object_name = `${uuidv4()}___${files[i]}` ;
@@ -145,13 +147,19 @@ const createFiles = async (files, book_id, user_id)=> {
           user_id,
           book_id
         ];
+        
         const { rows } = await dbQuery.query(createFileQuery, values);
         const dbResponse = rows[0];
         response.push(dbResponse);
         await uploadFileS3(  __basedir + `/public/uploads/${files[i]}` ,s3_object_name);
         
       }
-      
+
+      // Logging
+      setTimeout(function () {
+        sdc.timing('createBookImageS3.timer', s3_timer);
+      }, 100 * Math.random());
+      //* Logging
       await remove_local_photo();
       return response;
     } catch (error) {
