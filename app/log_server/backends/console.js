@@ -1,43 +1,45 @@
 /*jshint node:true, laxcomma:true */
-
-var util = require('util');
+const fs = require('fs');
 
 function ConsoleBackend(startupTime, config, emitter){
   var self = this;
   this.lastFlush = startupTime;
   this.lastException = startupTime;
   this.config = config.console || {};
-
   // attach
   emitter.on('flush', function(timestamp, metrics) { self.flush(timestamp, metrics); });
   emitter.on('status', function(callback) { self.status(callback); });
 }
 
+function log(message) {
+  console.log(message);
+  fs.appendFileSync('csye6225.log', message+"\r\n");
+}
+
 ConsoleBackend.prototype.flush = function(timestamp, metrics) {
-  console.log('Flushing stats at ', new Date(timestamp * 1000).toString());
+  var counters = metrics.counters ;
+  delete counters["statsd.bad_lines_seen"];
+  delete counters["statsd.packets_received"];
+  delete counters["statsd.metrics_received"];
 
-  var out = {
-    counters: metrics.counters,
-    timers: metrics.timers,
-    gauges: metrics.gauges,
-    timer_data: metrics.timer_data,
-    counter_rates: metrics.counter_rates,
-    sets: function (vals) {
-      var ret = {};
-      for (var val in vals) {
-        ret[val] = vals[val].values();
-      }
-      return ret;
-    }(metrics.sets),
-    pctThreshold: metrics.pctThreshold
-  };
+  var timers = metrics.timers;
 
-  if(this.config.prettyprint) {
-    console.log(util.inspect(out, {depth: 5, colors: true}));
-  } else {
-    console.log(out);
+  for( const counter in counters ){
+    if (counters[counter] !== 0) {
+      log(`${counter}:${counters[counter]}|c`);
+    } else {
+      console.log("no-api call count");
+    }
   }
 
+  for( const timer in timers ){
+    if( timers[timer].length !== 0 ){
+      log(`${timer}:${timers[timer].join(', ')}|ms`);
+    } else {
+      console.log("no-api call ms");
+    }
+
+  }
 };
 
 ConsoleBackend.prototype.status = function(write) {

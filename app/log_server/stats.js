@@ -182,10 +182,9 @@ function getFlushTimeout(interval) {
 
 // Global for the logger
 let l;
-
-config.configFile(process.argv[2], function (config) {
+// Config File
+config.configFile("exampleConfig.js", function (config) {
   conf = config;
-
   process_mgmt.init(config);
 
   l = new logger.Logger(config.log || {});
