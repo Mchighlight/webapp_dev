@@ -57,15 +57,11 @@ const createUser = async (req, res) => {
   let query_timer = new Date() ;
   try {
     const { rows } = await dbQuery.query(createUserQuery, values);
-    sdc.timing('userSignUpQuery.timer', query_timer);
     const dbResponse = rows[0];
     delete dbResponse.password;
     successMessage.data = dbResponse;
-    sdc.timing('userSignUp.timer', api_timer);
     return res.status(status.created).send(successMessage);
   } catch (error) {
-    sdc.timing('userSignUpQuery.timer', query_timer);
-    sdc.timing('userSignUp.timer', api_timer);
     if (error.routine === '_bt_check_unique') {
       errorMessage.error = 'User with that EMAIL already exist';
       return res.status(status.conflict).send(errorMessage);
@@ -89,30 +85,10 @@ const signIn = async (req, res) => {
   let query_timer = new Date() ;
   try {
     const { rows } = await dbQuery.query(signinUserQuery, [email]);
-    // Logging
-    setTimeout(function () {
-      sdc.timing('userSignInQuery.timer', query_timer);
-    }, 100 * Math.random());
-    // Logging
     const dbResponse = rows[0];
     successMessage.data = dbResponse;
-    // Logging
-    setTimeout(function () {
-      sdc.timing('userSignIn.timer', api_timer);
-    }, 100 * Math.random());
-    // Logging
     return res.status(status.success).send(successMessage);
   } catch (error) {
-    // Logging
-    setTimeout(function () {
-      sdc.timing('userSignInQuery.timer', query_timer);
-    }, 100 * Math.random());
-    // Logging
-    // Logging
-    setTimeout(function () {
-      sdc.timing('userSignIn.timer', api_timer);
-    }, 100 * Math.random());
-    // Logging
     errorMessage.error = 'Operation was not successful';
     return res.status(status.error).send(errorMessage);
   }
@@ -138,7 +114,6 @@ const updateUser = async (req, res) => {
     try {
       // Check update field
       if ( password && !validatePassword(password)) {
-        sdc.timing('userUpdate.timer', api_timer);
         errorMessage.error = 'Please enter a valid Password';
         return res.status(status.bad).send(errorMessage);
       }
@@ -154,31 +129,13 @@ const updateUser = async (req, res) => {
       ];
       
       const response = await dbQuery.query(updateUser, values);
-      // Logging
-      setTimeout(function () {
-        sdc.timing('userUpdateQuery.timer', query_timer);
-      }, 100 * Math.random());
-      // Logging
+
       const dbResult = response.rows[0];
       delete dbResult.password;
       successMessage.data = dbResult;
-      // Logging
-      setTimeout(function () {
-        sdc.timing('userUpdate.timer', api_timer);
-      }, 100 * Math.random());
-      // Logging
+
       return res.status(status.success).send(successMessage);
     } catch (error) {
-      // Logging
-      setTimeout(function () {
-        sdc.timing('userUpdateQuery.timer', query_timer);
-      }, 100 * Math.random());
-      // Logging
-      // Logging
-      setTimeout(function () {
-        sdc.timing('userUpdate.timer', api_timer);
-      }, 100 * Math.random());
-      // Logging
       errorMessage.error = 'Operation was not successful';
       return res.status(status.error).send(errorMessage);
     }

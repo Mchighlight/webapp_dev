@@ -1,11 +1,7 @@
 const express = require('express') ;
 const bodyParser = require('body-parser');
 const usersRoute = require('./routes/userRoutes');
-const booksRoute = require('./routes/bookRoutes');
-const filesRoute = require('./routes/fileRoutes');
 const server = express();
-const SDC = require('statsd-client');
-global.sdc = new SDC({host: 'localhost'});
 
 
 global.__basedir = __dirname;
@@ -17,8 +13,6 @@ async function runServer() {
 
     
     server.use('/user/self', usersRoute);
-    server.use('/books', booksRoute);
-    server.use('/books', filesRoute);
     
     server.get("/", (req, res) => res.json({message: "Welcome to our Bookstore!"}));
     
